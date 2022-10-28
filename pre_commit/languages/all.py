@@ -36,7 +36,7 @@ class Language(NamedTuple):
     # return whether the environment is healthy (or should be rebuilt)
     health_check: Callable[[Prefix, str], str | None]
     # install a repository for the given language and language_version
-    install_environment: Callable[[Prefix, str, Sequence[str]], None]
+    install_environment: Callable[[Prefix, str, Sequence[str], str], None]
     # execute a hook and return the exit code and output
     run_hook: Callable[[Hook, Sequence[str], bool], tuple[int, bytes]]
 

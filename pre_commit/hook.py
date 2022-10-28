@@ -13,6 +13,7 @@ logger = logging.getLogger('pre_commit')
 
 class Hook(NamedTuple):
     src: str
+    rev: str
     prefix: Prefix
     id: str
     name: str
@@ -51,7 +52,7 @@ class Hook(NamedTuple):
         )
 
     @classmethod
-    def create(cls, src: str, prefix: Prefix, dct: dict[str, Any]) -> Hook:
+    def create(cls, src: str, rev: str, prefix: Prefix, dct: dict[str, Any]) -> Hook:
         # TODO: have cfgv do this (?)
         extra_keys = set(dct) - _KEYS
         if extra_keys:
@@ -59,7 +60,7 @@ class Hook(NamedTuple):
                 f'Unexpected key(s) present on {src} => {dct["id"]}: '
                 f'{", ".join(sorted(extra_keys))}',
             )
-        return cls(src=src, prefix=prefix, **{k: dct[k] for k in _KEYS})
+        return cls(src=src, rev=rev, prefix=prefix, **{k: dct[k] for k in _KEYS})
 
 
-_KEYS = frozenset(set(Hook._fields) - {'src', 'prefix'})
+_KEYS = frozenset(set(Hook._fields) - {'src', 'rev', 'prefix'})

@@ -45,8 +45,8 @@ def guess_go_dir(remote_url: str) -> str:
     if remote_url.endswith('.git'):
         remote_url = remote_url[:-1 * len('.git')]
     looks_like_url = (
-        not remote_url.startswith('file://') and
-        ('//' in remote_url or '@' in remote_url)
+            not remote_url.startswith('file://') and
+            ('//' in remote_url or '@' in remote_url)
     )
     remote_url = remote_url.replace(':', '/')
     if looks_like_url:
@@ -57,22 +57,22 @@ def guess_go_dir(remote_url: str) -> str:
         return 'unknown_src_dir'
 
 
-def find_go_mod_dir(repo_src_dir: str) -> str:
-    # First the root
-    if os.path.exists(os.path.join(repo_src_dir, 'go.mod')):
+def find_go_mod_dir(repo_src_dir: str, rev: str) -> str:
+    # parse the semantic version
+    tokens = rev.split('.', maxsplit=1)
+    major_version = tokens[0]
+
+    if major_version in ['v0', 'v1']:
         return repo_src_dir
-    # Check if there are any major version directories
-    for each in os.scandir(repo_src_dir):
-        if each.is_dir() and re.fullmatch('v[0-9]+', each.name) \
-                and os.path.exists(os.path.join(each.path, 'go.mod')):
-            return each.path
-    raise FatalError('could not find a go.mod file in this git repository')
+    else:
+        return os.path.join(repo_src_dir, major_version)
 
 
 def install_environment(
         prefix: Prefix,
         version: str,
         additional_dependencies: Sequence[str],
+        rev: str
 ) -> None:
     helpers.assert_version_default('golang', version)
     directory = prefix.path(
@@ -94,7 +94,7 @@ def install_environment(
             gopath = directory
         env = dict(os.environ, GOPATH=gopath)
         env.pop('GOBIN', None)
-        go_root_dir = find_go_mod_dir(repo_src_dir)
+        go_root_dir = find_go_mod_dir(repo_src_dir, rev)
         cmd_output_b('go', 'install', './...', cwd=go_root_dir, env=env)
         for dependency in additional_dependencies:
             cmd_output_b(

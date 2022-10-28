@@ -78,6 +78,7 @@ def _hook_install(hook: Hook) -> None:
 
     lang.install_environment(
         hook.prefix, hook.language_version, hook.additional_dependencies,
+        hook.rev
     )
     health_error = lang.health_check(hook.prefix, hook.language_version)
     if health_error:
@@ -187,6 +188,7 @@ def _cloned_repository_hooks(
     return tuple(
         Hook.create(
             repo_config['repo'],
+            repo_config['rev'],
             Prefix(store.clone(repo, rev, hook['additional_dependencies'])),
             hook,
         )
